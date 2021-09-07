@@ -17,15 +17,13 @@ public class AreaInfo {
     @BeanFieldAnnotation(order = 2)
     private String provinceCode;
 
+    @JSONField(name = "freight_area_name")
+    @BeanFieldAnnotation(order = 3)
+    private String cityName;
 
     @JSONField(name = "freight_area_code")
-    @BeanFieldAnnotation(order = 3)
-    private String  cityCode;
-
-
-    @JSONField(name = "freight_area_name")
     @BeanFieldAnnotation(order = 4)
-    private String cityName;
+    private String  cityCode;
 
 
 }
