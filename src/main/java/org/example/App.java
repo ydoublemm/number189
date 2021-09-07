@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.text.csv.CsvWriter;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSON;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.example.annotation.AnnotationUtils;
 import org.example.pojo.*;
@@ -16,12 +17,13 @@ import java.util.stream.Collectors;
 /**
  * Hello world!
  */
+
 public class App {
     public static void main(String[] args) throws Exception {
 
         //getProvinceInfo();
 
-       // getAreaInfo();
+        // getAreaInfo();
 
         getPhoneInfo();
     }
@@ -38,13 +40,11 @@ public class App {
 
         CsvWriter writer = CsvUtils.getWrite("phone.csv");
         writer.write(AnnotationUtils.getOrderedField(PhoneInfo.class));
-
+        int flag = 1;
         for(int i=0;i<areaInfoList.size();i++){
-
+            AreaInfo areaInfo = areaInfoList.get(i);
             try {
-                AreaInfo areaInfo = areaInfoList.get(0);
-
-                String resStr = fun(areaInfo.getProvinceCode(), areaInfo.getCityCode(), 100000);
+                String resStr = fun(areaInfo.getProvinceCode(), areaInfo.getCityCode(), 10000);
 
                 List<Res> resList = JSON.parseArray(resStr, Res.class);
 
@@ -78,15 +78,16 @@ public class App {
                     }
 
                 }
-
+                System.out.println(areaInfo.getProvinceName()+" : "+ areaInfo.getCityName()+" 爬取成功");
 
             }catch (Exception e){
-
                 System.out.println("获取电话信息报错 :"+e.getMessage());
-
+                System.out.println(areaInfo.getProvinceName()+" : "+ areaInfo.getCityName() + "第" + flag +"次失败");
                 i--;
-
-
+                if(flag++ > 2) {
+                    i++;
+                    flag = 1;
+                }
             }
 
             Thread.sleep(5000);
@@ -111,7 +112,7 @@ public class App {
 
             ProvinceInfo provinceInfo = provinceInfoList.get(i);
             try {
-                 List<AreaInfo> areaInfoList = new ArrayList<>();
+                List<AreaInfo> areaInfoList = new ArrayList<>();
 
                 String resStr = fun(provinceInfo.getCode(), "", 10);
 
@@ -163,23 +164,23 @@ public class App {
 
         try {
 
-        String resStr = fun("600101", "", 10);
+            String resStr = fun("600101", "", 10);
 
-        List<Res> resList = JSON.parseArray(resStr, Res.class);
+            List<Res> resList = JSON.parseArray(resStr, Res.class);
 
-        Res res = new Res();
-        if (resList != null) {
-            res = resList.get(0);
-        }
+            Res res = new Res();
+            if (resList != null) {
+                res = resList.get(0);
+            }
 
-        //没有报错
-        if (ObjectUtil.isEmpty(res.getErrorMsg())) {
+            //没有报错
+            if (ObjectUtil.isEmpty(res.getErrorMsg())) {
 
-            List<ProvinceInfo> provinceInfo = res.getProvinceInfo();
+                List<ProvinceInfo> provinceInfo = res.getProvinceInfo();
 
-            CsvUtils.write("provinceInfo.csv", provinceInfo, ProvinceInfo.class);
+                CsvUtils.write("provinceInfo.csv", provinceInfo, ProvinceInfo.class);
 
-        }
+            }
         }catch (Exception e){
             System.out.println("获取省份信息报错:"+e);
         }
